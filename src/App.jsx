@@ -22,6 +22,186 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Hero Card Interactive Particle Constellation Canvas
+function ParticleCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+
+    let width = (canvas.width = canvas.offsetWidth);
+    let height = (canvas.height = canvas.offsetHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    const particles = [];
+    const count = 75;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: (Math.random() - 0.5) * 1.2,
+        radius: Math.random() * 2 + 1,
+      });
+    }
+
+    let mouse = { x: null, y: null, radius: 130 };
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    };
+    const handleMouseLeave = () => {
+      mouse.x = null;
+      mouse.y = null;
+    };
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        if (mouse.x !== null && mouse.y !== null) {
+          let dx = mouse.x - p.x;
+          let dy = mouse.y - p.y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < mouse.radius) {
+            let angle = Math.atan2(dy, dx);
+            p.x -= Math.cos(angle) * 1.5;
+            p.y -= Math.sin(angle) * 1.5;
+          }
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
+        ctx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          let p2 = particles[j];
+          let dx = p.x - p2.x;
+          let dy = p.y - p2.y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 100) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(16, 185, 129, ${1 - dist / 100})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-auto z-10" />;
+}
+
+// Full Background Cinematic 3D Portal Canvas
+function Cinematic3DPortalCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animId;
+
+    let width = (canvas.width = canvas.offsetWidth);
+    let height = (canvas.height = canvas.offsetHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    let angle = 0;
+    const particles = [];
+    for (let i = 0; i < 120; i++) {
+      particles.push({
+        angle: Math.random() * Math.PI * 2,
+        radius: Math.random() * 250 + 50,
+        speed: Math.random() * 0.015 + 0.005,
+        yOffset: (Math.random() - 0.5) * 150,
+        size: Math.random() * 2.2 + 0.8,
+      });
+    }
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+      angle += 0.008;
+
+      const cx = width / 2;
+      const cy = height / 2;
+
+      const gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, 250);
+      gradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
+      gradient.addColorStop(0.5, 'rgba(20, 184, 166, 0.1)');
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 250, 0, Math.PI * 2);
+      ctx.fill();
+
+      particles.forEach((p) => {
+        p.angle += p.speed;
+        const x = cx + Math.cos(p.angle + angle) * p.radius * 1.8;
+        const y = cy + Math.sin(p.angle + angle) * (p.radius * 0.6) + p.yOffset;
+
+        ctx.beginPath();
+        ctx.arc(x, y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = '#34d399';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#10b981';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animId);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none opacity-60 z-0" />;
+}
+
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAnnual, setIsAnnual] = useState(true);
@@ -32,18 +212,6 @@ export default function App() {
   const reviewsRef = useRef(null);
   const lenisRef = useRef(null);
 
-  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
-
-  // Mouse trail tracker
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  // Initialize Lenis Smooth Scroll
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
@@ -70,7 +238,6 @@ export default function App() {
     };
   }, []);
 
-  // GSAP ScrollTrigger Animations
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
@@ -184,123 +351,101 @@ export default function App() {
   ];
 
   return (
-  <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-white relative overflow-hidden">
 
-    {/* Background Animated Ambient Orbs & Cyber Grid */}
-    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-      {/* Tech Grid Pattern */}
-      <div className="absolute inset-0 bg-tech-grid opacity-60"></div>
+      {/* Global Background Tech Grid & Scanline Animation Layer */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute inset-0 bg-tech-grid opacity-70"></div>
+        <div className="absolute inset-x-0 h-32 bg-gradient-to-b from-transparent via-emerald-500/20 to-transparent animate-scanline"></div>
 
-      {/* Moving Laser Beam Line */}
-      <div className="absolute inset-x-0 h-32 bg-gradient-to-b from-transparent via-emerald-500/10 to-transparent animate-scanline"></div>
-
-      {/* Floating Orbs */}
-      <motion.div 
-        animate={{ 
-          x: [0, 100, -50, 0], 
-          y: [0, -80, 100, 0],
-          scale: [1, 1.2, 0.9, 1]
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-10 left-10 w-[500px] h-[500px] bg-emerald-500/10 blur-[160px] rounded-full"
-      />
-      <motion.div 
-        animate={{ 
-          x: [0, -120, 80, 0], 
-          y: [0, 100, -60, 0],
-          scale: [1, 0.9, 1.3, 1]
-        }}
-        transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-1/2 right-10 w-[600px] h-[600px] bg-teal-500/10 blur-[180px] rounded-full"
-      />
-      <motion.div 
-        animate={{ 
-          x: [0, 90, -90, 0], 
-          y: [0, 120, 80, 0],
-          scale: [1, 1.1, 1, 1]
-        }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-20 left-1/3 w-[550px] h-[550px] bg-emerald-600/10 blur-[170px] rounded-full"
-      />
-    </div>
+        <motion.div 
+          animate={{ x: [0, 100, -50, 0], y: [0, -80, 100, 0], scale: [1, 1.2, 0.9, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-10 left-10 w-[500px] h-[500px] bg-emerald-500/10 blur-[160px] rounded-full"
+        />
+        <motion.div 
+          animate={{ x: [0, -120, 80, 0], y: [0, 100, -60, 0], scale: [1, 0.9, 1.3, 1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-1/2 right-10 w-[600px] h-[600px] bg-teal-500/10 blur-[180px] rounded-full"
+        />
+      </div>
 
       {/* Navbar */}
-<motion.nav 
-  initial={{ y: -50, opacity: 0 }}
-  animate={{ y: 0, opacity: 1 }}
-  transition={{ duration: 0.6, ease: 'easeOut' }}
-  className="fixed top-0 left-0 right-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60"
->
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-    <div className="flex items-center space-x-2 cursor-pointer group">
-      <motion.div 
-        whileHover={{ rotate: 15, scale: 1.1 }}
-        className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 transition-colors group-hover:border-emerald-400"
+      <motion.nav 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="fixed top-0 left-0 right-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60"
       >
-        <Leaf className="w-6 h-6" />
-      </motion.div>
-      <span className="text-xl font-bold tracking-tight text-white">Verde<span className="text-emerald-400">.</span></span>
-    </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center space-x-2 cursor-pointer group">
+            <motion.div 
+              whileHover={{ rotate: 15, scale: 1.1 }}
+              className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 transition-colors group-hover:border-emerald-400"
+            >
+              <Leaf className="w-6 h-6" />
+            </motion.div>
+            <span className="text-xl font-bold tracking-tight text-white">Verde<span className="text-emerald-400">.</span></span>
+          </div>
 
-    <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
-      {['Features', 'Reviews', 'Pricing', 'FAQ'].map((item) => (
-        <a 
-          key={item}
-          href={`#${item.toLowerCase()}`} 
-          onClick={(e) => handleNavClick(e, `#${item.toLowerCase()}`)} 
-          className="hover:text-emerald-400 transition duration-200 hover:-translate-y-0.5 inline-block"
-        >
-          {item}
-        </a>
-      ))}
-    </div>
+          <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+            {['Features', 'Reviews', 'Pricing', 'FAQ'].map((item) => (
+              <a 
+                key={item}
+                href={`#${item.toLowerCase()}`} 
+                onClick={(e) => handleNavClick(e, `#${item.toLowerCase()}`)} 
+                className="hover:text-emerald-400 transition duration-200 hover:-translate-y-0.5 inline-block"
+              >
+                {item}
+              </a>
+            ))}
+          </div>
 
-    <div className="hidden md:flex items-center space-x-4">
-      <motion.a 
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        href="#pricing" 
-        onClick={(e) => handleNavClick(e, '#pricing')} 
-        className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm transition shadow-lg shadow-emerald-500/20"
-      >
-        Pre-Order Now
-      </motion.a>
-    </div>
+          <div className="hidden md:flex items-center space-x-4">
+            <motion.a 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              href="#pricing" 
+              onClick={(e) => handleNavClick(e, '#pricing')} 
+              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm transition shadow-lg shadow-emerald-500/20"
+            >
+              Pre-Order Now
+            </motion.a>
+          </div>
 
-    <button 
-      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-      className="md:hidden text-slate-300 hover:text-white focus:outline-none"
-    >
-      {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-    </button>
-  </div>
-
-  {/* Mobile Menu */}
-  <AnimatePresence>
-    {mobileMenuOpen && (
-      <motion.div 
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        className="md:hidden bg-slate-900 border-b border-slate-800 px-6 py-6 space-y-4"
-      >
-        <a href="#features" onClick={(e) => handleNavClick(e, '#features')} className="block text-base font-medium text-slate-300 hover:text-emerald-400">Features</a>
-        <a href="#reviews" onClick={(e) => handleNavClick(e, '#reviews')} className="block text-base font-medium text-slate-300 hover:text-emerald-400">Reviews</a>
-        <a href="#pricing" onClick={(e) => handleNavClick(e, '#pricing')} className="block text-base font-medium text-slate-300 hover:text-emerald-400">Pricing</a>
-        <a href="#faq" onClick={(e) => handleNavClick(e, '#faq')} className="block text-base font-medium text-slate-300 hover:text-emerald-400">FAQ</a>
-        <div className="pt-2">
-          <a href="#pricing" onClick={(e) => handleNavClick(e, '#pricing')} className="block w-full py-3 text-center rounded-xl bg-emerald-500 font-semibold text-slate-950">
-            Pre-Order Now
-          </a>
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden text-slate-300 hover:text-white focus:outline-none"
+          >
+            {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+          </button>
         </div>
-      </motion.div>
-    )}
-  </AnimatePresence>
-</motion.nav>
+
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-slate-900 border-b border-slate-800 px-6 py-6 space-y-4"
+            >
+              <a href="#features" onClick={(e) => handleNavClick(e, '#features')} className="block text-base font-medium text-slate-300 hover:text-emerald-400">Features</a>
+              <a href="#reviews" onClick={(e) => handleNavClick(e, '#reviews')} className="block text-base font-medium text-slate-300 hover:text-emerald-400">Reviews</a>
+              <a href="#pricing" onClick={(e) => handleNavClick(e, '#pricing')} className="block text-base font-medium text-slate-300 hover:text-emerald-400">Pricing</a>
+              <a href="#faq" onClick={(e) => handleNavClick(e, '#faq')} className="block text-base font-medium text-slate-300 hover:text-emerald-400">FAQ</a>
+              <div className="pt-2">
+                <a href="#pricing" onClick={(e) => handleNavClick(e, '#pricing')} className="block w-full py-3 text-center rounded-xl bg-emerald-500 font-semibold text-slate-950">
+                  Pre-Order Now
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden relative">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 blur-[140px] rounded-full pointer-events-none"></div>
+      <section className="pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden relative bg-transparent">
+        <Cinematic3DPortalCanvas />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -334,23 +479,6 @@ export default function App() {
                   Explore Features
                 </a>
               </div>
-
-              <div className="pt-6 flex items-center justify-center lg:justify-start space-x-8 text-sm text-slate-400 border-t border-slate-900">
-                <div>
-                  <p className="text-2xl font-bold text-white">100%</p>
-                  <p>Solar Powered</p>
-                </div>
-                <div className="w-px h-8 bg-slate-800"></div>
-                <div>
-                  <p className="text-2xl font-bold text-white">50k+</p>
-                  <p>Active Users</p>
-                </div>
-                <div className="w-px h-8 bg-slate-800"></div>
-                <div>
-                  <p className="text-2xl font-bold text-white">4.9/5</p>
-                  <p>User Rating</p>
-                </div>
-              </div>
             </motion.div>
 
             <motion.div 
@@ -359,29 +487,15 @@ export default function App() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="lg:col-span-5 flex justify-center"
             >
-              <Tilt 
-                perspective={1000} 
-                glareEnable={true} 
-                glareMaxOpacity={0.3} 
-                scale={1.02}
-                className="w-full max-w-md"
-              >
-                <div className="relative w-full">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-3xl blur-2xl opacity-20 transform rotate-6"></div>
-                  <div className="relative bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl overflow-hidden group">
-                    <div className="absolute top-0 right-0 bg-emerald-500 text-slate-950 text-xs font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                      New Release
-                    </div>
-                    <div className="h-64 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 flex items-center justify-center border border-slate-800">
-                      <Leaf className="w-24 h-24 text-emerald-400 animate-spin" style={{ animationDuration: '8s' }} />
-                    </div>
-                    <div className="mt-6 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-bold text-white">Verde Eco-Hub v2</h3>
-                        <span className="text-emerald-400 font-bold">$129</span>
-                      </div>
-                      <p className="text-sm text-slate-400">Advanced ambient energy harvest with instant smartphone telemetry sync.</p>
-                    </div>
+              <Tilt perspective={1000} glareEnable={true} glareMaxOpacity={0.3} scale={1.02} className="w-full max-w-md">
+                <div className="relative w-full h-[380px] rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl overflow-hidden flex items-center justify-center">
+                  <ParticleCanvas />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-teal-400/10 pointer-events-none"></div>
+                  
+                  <div className="relative z-20 bg-slate-950/80 backdrop-blur-md border border-emerald-500/40 px-6 py-4 rounded-2xl text-center shadow-xl">
+                    <Leaf className="w-10 h-10 text-emerald-400 mx-auto mb-2 animate-bounce" />
+                    <h3 className="text-sm font-bold text-white">Verde Interactive Core</h3>
+                    <p className="text-xs text-emerald-400 mt-0.5">Move cursor to interact</p>
                   </div>
                 </div>
               </Tilt>
@@ -391,13 +505,13 @@ export default function App() {
         </div>
       </section>
 
-      {/* Product Features Grid */}
-      <section id="features" ref={featuresRef} className="py-24 bg-slate-900/50 border-t border-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Product Features Section */}
+      <section id="features" ref={featuresRef} className="py-24 bg-transparent border-t border-slate-900 relative overflow-hidden">
+        <Cinematic3DPortalCanvas />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto space-y-4 mb-16 gsap-heading">
             <h2 className="text-emerald-400 text-sm font-bold uppercase tracking-widest">Engineered for Excellence</h2>
             <p className="text-3xl sm:text-4xl font-extrabold text-white">Packed with Sustainable Innovation</p>
-            <p className="text-slate-400 text-base">Every element of Verde is carefully designed to offer maximum performance with minimum environmental impact.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -408,16 +522,13 @@ export default function App() {
               { icon: Smartphone, title: "Smart Sync", desc: "Pair seamlessly with iOS and Android apps to view real-time eco-statistics." }
             ].map((feature, idx) => (
               <Tilt key={idx} perspective={800} scale={1.03} className="h-full">
-                <motion.div 
-                  whileHover={{ y: -5 }}
-                  className="gsap-feature-card h-full bg-slate-900 border border-slate-800/80 p-8 rounded-2xl space-y-4 hover:border-emerald-500/50 transition duration-300 shadow-lg hover:shadow-emerald-500/10"
-                >
+                <div className="gsap-feature-card h-full bg-slate-900/80 backdrop-blur-md border border-slate-800/80 p-8 rounded-2xl space-y-4 shadow-xl">
                   <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                     <feature.icon className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-bold text-white">{feature.title}</h3>
                   <p className="text-sm text-slate-400 leading-relaxed">{feature.desc}</p>
-                </motion.div>
+                </div>
               </Tilt>
             ))}
           </div>
@@ -425,8 +536,9 @@ export default function App() {
       </section>
 
       {/* Customer Reviews Section */}
-      <section id="reviews" ref={reviewsRef} className="py-24 border-t border-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="reviews" ref={reviewsRef} className="py-24 bg-transparent border-t border-slate-900 relative overflow-hidden">
+        <Cinematic3DPortalCanvas />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto space-y-4 mb-16 gsap-heading">
             <h2 className="text-emerald-400 text-sm font-bold uppercase tracking-widest">Loved by Thousands</h2>
             <p className="text-3xl sm:text-4xl font-extrabold text-white">What Our Community Says</p>
@@ -439,7 +551,7 @@ export default function App() {
               { name: "Elena Rostova", role: "Sustainability Lead", text: "The app integration is flawless and seeing my real-time carbon offset is surprisingly motivating." }
             ].map((review, idx) => (
               <Tilt key={idx} perspective={800} scale={1.02} className="h-full">
-                <div className="gsap-review-card h-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl space-y-4 flex flex-col justify-between shadow-lg hover:border-emerald-500/40 transition duration-300">
+                <div className="gsap-review-card h-full bg-slate-900/80 backdrop-blur-md border border-slate-800/80 p-8 rounded-2xl space-y-4 flex flex-col justify-between shadow-xl">
                   <div className="space-y-4">
                     <div className="flex space-x-1 text-amber-400">
                       {[...Array(5)].map((_, i) => (
@@ -459,9 +571,10 @@ export default function App() {
         </div>
       </section>
 
-      {/* Pricing Toggle Section */}
-      <section id="pricing" className="py-24 bg-slate-900/30 border-t border-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Simple, Transparent Pricing */}
+      <section id="pricing" className="py-24 bg-transparent border-t border-slate-900 relative overflow-hidden">
+        <Cinematic3DPortalCanvas />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto space-y-4 mb-12 gsap-heading">
             <h2 className="text-emerald-400 text-sm font-bold uppercase tracking-widest">Flexible Options</h2>
             <p className="text-3xl sm:text-4xl font-extrabold text-white">Simple, Transparent Pricing</p>
@@ -471,7 +584,7 @@ export default function App() {
               <span className={`text-sm font-semibold ${!isAnnual ? 'text-white' : 'text-slate-400'}`}>Monthly</span>
               <button 
                 onClick={() => setIsAnnual(!isAnnual)}
-                className="w-14 h-8 bg-slate-800 rounded-full p-1 relative transition border border-slate-700"
+                className="w-14 h-8 bg-slate-800 rounded-full p-1 relative transition border border-slate-700 cursor-pointer"
               >
                 <div className={`w-6 h-6 bg-emerald-500 rounded-full transition-transform ${isAnnual ? 'translate-x-6' : 'translate-x-0'}`}></div>
               </button>
@@ -480,153 +593,144 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-  {/* Starter Eco Card */}
-  <Tilt perspective={800} scale={1.02} className="h-full">
-    <div 
-      onClick={() => handlePlanSelect('starter')}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handlePlanSelect('starter')}
-      tabIndex={0}
-      role="button"
-      aria-pressed={selectedPlan === 'starter'}
-      className={`h-full bg-slate-900 rounded-3xl p-8 space-y-6 flex flex-col justify-between transition-all duration-300 cursor-pointer outline-none focus:ring-2 focus:ring-emerald-400 ${
-        selectedPlan === 'starter'
-          ? 'border-2 border-emerald-500 shadow-xl shadow-emerald-500/10'
-          : 'border border-slate-800 hover:border-slate-700 opacity-90 hover:opacity-100'
-      }`}
-    >
-      <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-xl font-bold text-white">Starter Eco</h3>
-            <p className="text-sm text-slate-400 mt-1">Perfect for individuals beginning their green journey.</p>
-          </div>
-          {selectedPlan === 'starter' && (
-            <span className="bg-emerald-500 text-slate-950 font-bold text-xs uppercase px-3 py-1 rounded-full">
-              Selected
-            </span>
-          )}
-        </div>
-        <div className="flex items-baseline space-x-2">
-          <span className="text-4xl font-extrabold text-white">{isAnnual ? '$99' : '$129'}</span>
-          <span className="text-sm text-slate-400">/ device</span>
-        </div>
-        <ul className="space-y-3 text-sm text-slate-300">
-          <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Verde Standard Device</span></li>
-          <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Basic App Telemetry Sync</span></li>
-          <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>1-Year Hardware Warranty</span></li>
-        </ul>
-      </div>
-      <button 
-        onClick={(e) => {
-          e.stopPropagation();
-          handlePlanSelect('starter');
-        }}
-        className={`w-full py-3.5 rounded-xl font-semibold transition cursor-pointer active:scale-95 ${
-          selectedPlan === 'starter'
-            ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20'
-            : 'bg-slate-800 hover:bg-slate-700 text-white'
-        }`}
-      >
-        {selectedPlan === 'starter' ? 'Selected Plan' : 'Choose Starter'}
-      </button>
-    </div>
-  </Tilt>
+            <Tilt perspective={1000} scale={1.02} className="h-full">
+              <div 
+                onClick={() => handlePlanSelect('starter')}
+                className={`h-full bg-slate-900/90 backdrop-blur-md rounded-3xl p-8 space-y-6 flex flex-col justify-between transition-all duration-300 cursor-pointer relative z-10 ${
+                  selectedPlan === 'starter'
+                    ? 'border-2 border-emerald-500 shadow-2xl shadow-emerald-500/20'
+                    : 'border border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <div className="space-y-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Starter Eco</h3>
+                      <p className="text-sm text-slate-400 mt-1">Perfect for individuals beginning their green journey.</p>
+                    </div>
+                    {selectedPlan === 'starter' && (
+                      <span className="bg-emerald-500 text-slate-950 font-bold text-xs uppercase px-3 py-1 rounded-full">
+                        Selected
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-4xl font-extrabold text-white">{isAnnual ? '$99' : '$129'}</span>
+                    <span className="text-sm text-slate-400">/ device</span>
+                  </div>
+                  <ul className="space-y-3 text-sm text-slate-300">
+                    <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Verde Standard Device</span></li>
+                    <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Basic App Telemetry Sync</span></li>
+                    <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>1-Year Hardware Warranty</span></li>
+                  </ul>
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePlanSelect('starter');
+                  }}
+                  className={`w-full py-3.5 rounded-xl font-semibold transition cursor-pointer ${
+                    selectedPlan === 'starter'
+                      ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20'
+                      : 'bg-slate-800 hover:bg-slate-700 text-white'
+                  }`}
+                >
+                  {selectedPlan === 'starter' ? 'Selected Plan' : 'Choose Starter'}
+                </button>
+              </div>
+            </Tilt>
 
-  {/* Pro Sustainable Card */}
-  <Tilt perspective={800} scale={1.02} className="h-full">
-    <div 
-      onClick={() => handlePlanSelect('pro')}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handlePlanSelect('pro')}
-      tabIndex={0}
-      role="button"
-      aria-pressed={selectedPlan === 'pro'}
-      className={`h-full bg-slate-900 rounded-3xl p-8 space-y-6 flex flex-col justify-between relative transition-all duration-300 cursor-pointer outline-none focus:ring-2 focus:ring-emerald-400 ${
-        selectedPlan === 'pro'
-          ? 'border-2 border-emerald-500 shadow-xl shadow-emerald-500/10'
-          : 'border border-slate-800 hover:border-slate-700 opacity-90 hover:opacity-100'
-      }`}
-    >
-      <div className="absolute -top-3.5 right-8 bg-emerald-500 text-slate-950 font-bold text-xs uppercase px-3 py-1 rounded-full z-10">
-        Most Popular
-      </div>
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-xl font-bold text-white">Pro Sustainable</h3>
-          <p className="text-sm text-slate-400 mt-1">Ideal for complete home monitoring and advanced analytics.</p>
-        </div>
-        <div className="flex items-baseline space-x-2">
-          <span className="text-4xl font-extrabold text-white">{isAnnual ? '$159' : '$199'}</span>
-          <span className="text-sm text-slate-400">/ device</span>
-        </div>
-        <ul className="space-y-3 text-sm text-slate-300">
-          <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Verde Pro Device + Solar Hub</span></li>
-          <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Advanced Analytics & API Access</span></li>
-          <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>2-Year Comprehensive Warranty</span></li>
-          <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Priority Customer Support</span></li>
-        </ul>
-      </div>
-      <button 
-        onClick={(e) => {
-          e.stopPropagation();
-          handlePlanSelect('pro');
-        }}
-        className={`w-full py-3.5 rounded-xl font-semibold transition cursor-pointer active:scale-95 ${
-          selectedPlan === 'pro'
-            ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20'
-            : 'bg-slate-800 hover:bg-slate-700 text-white'
-        }`}
-      >
-        {selectedPlan === 'pro' ? 'Selected Plan' : 'Choose Pro'}
-      </button>
-    </div>
-  </Tilt>
-</div>
+            <Tilt perspective={1000} scale={1.02} className="h-full">
+              <div 
+                onClick={() => handlePlanSelect('pro')}
+                className={`h-full bg-slate-900/90 backdrop-blur-md rounded-3xl p-8 space-y-6 flex flex-col justify-between relative transition-all duration-300 cursor-pointer z-10 ${
+                  selectedPlan === 'pro'
+                    ? 'border-2 border-emerald-500 shadow-2xl shadow-emerald-500/20'
+                    : 'border border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <div className="absolute -top-3.5 right-8 bg-emerald-500 text-slate-950 font-bold text-xs uppercase px-3 py-1 rounded-full z-20">
+                  Most Popular
+                </div>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Pro Sustainable</h3>
+                    <p className="text-sm text-slate-400 mt-1">Ideal for complete home monitoring and advanced analytics.</p>
+                  </div>
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-4xl font-extrabold text-white">{isAnnual ? '$159' : '$199'}</span>
+                    <span className="text-sm text-slate-400">/ device</span>
+                  </div>
+                  <ul className="space-y-3 text-sm text-slate-300">
+                    <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Verde Pro Device + Solar Hub</span></li>
+                    <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Advanced Analytics & API Access</span></li>
+                    <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>2-Year Comprehensive Warranty</span></li>
+                    <li className="flex items-center space-x-3"><Check className="w-5 h-5 text-emerald-400" /><span>Priority Customer Support</span></li>
+                  </ul>
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePlanSelect('pro');
+                  }}
+                  className={`w-full py-3.5 rounded-xl font-semibold transition cursor-pointer ${
+                    selectedPlan === 'pro'
+                      ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20'
+                      : 'bg-slate-800 hover:bg-slate-700 text-white'
+                  }`}
+                >
+                  {selectedPlan === 'pro' ? 'Selected Plan' : 'Choose Pro'}
+                </button>
+              </div>
+            </Tilt>
+          </div>
         </div>
       </section>
 
-      {/* FAQ Accordion Section */}
-      <section id="faq" className="py-24 border-t border-slate-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Frequently Asked Questions */}
+      <section id="faq" className="py-24 bg-transparent border-t border-slate-900 relative overflow-hidden">
+        <Cinematic3DPortalCanvas />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center space-y-4 mb-16 gsap-heading">
             <h2 className="text-emerald-400 text-sm font-bold uppercase tracking-widest">Got Questions?</h2>
             <p className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</p>
           </div>
 
           <div className="space-y-4">
-  {faqs.map((faq, index) => (
-    <motion.div 
-      key={index} 
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.2 }}
-      className="bg-slate-900 border border-slate-800 hover:border-emerald-500/40 rounded-2xl overflow-hidden transition-colors"
-    >
-      <button 
-        onClick={() => toggleFaq(index)}
-        className="w-full px-6 py-5 text-left font-semibold text-white flex justify-between items-center focus:outline-none cursor-pointer"
-      >
-        <span>{faq.q}</span>
-        <ChevronDown className={`w-5 h-5 text-emerald-400 transition-transform duration-300 ${openFaq === index ? 'rotate-180' : ''}`} />
-      </button>
-      <AnimatePresence>
-        {openFaq === index && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-slate-800/40 pt-4"
-          >
-            {faq.a}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  ))}
-</div>
+            {faqs.map((faq, index) => (
+              <motion.div 
+                key={index} 
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+                className="bg-slate-900/90 backdrop-blur-md border border-slate-800 hover:border-emerald-500/50 rounded-2xl overflow-hidden transition-colors shadow-xl relative z-10"
+              >
+                <button 
+                  onClick={() => toggleFaq(index)}
+                  className="w-full px-6 py-5 text-left font-semibold text-white flex justify-between items-center focus:outline-none cursor-pointer"
+                >
+                  <span>{faq.q}</span>
+                  <ChevronDown className={`w-5 h-5 text-emerald-400 transition-transform duration-300 ${openFaq === index ? 'rotate-180' : ''}`} />
+                </button>
+                <AnimatePresence>
+                  {openFaq === index && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-slate-800/40 pt-4"
+                    >
+                      {faq.a}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-950 border-t border-slate-900 py-12">
+      <footer className="bg-slate-950 border-t border-slate-900 py-12 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
